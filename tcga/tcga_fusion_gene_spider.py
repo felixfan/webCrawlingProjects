@@ -158,8 +158,13 @@ if __name__ == '__main__':
 	d = datetime.datetime.now()
 	stime = str(d.year) + str(d.month) + str(d.day) + str(d.hour) + str(d.minute) + str(d.second)
 	output = "tcga_fusion_genes_annot_%s.txt" % stime
+	print 'write results to %s' % output
 	header = ("Cancer", "TCGA_Sample_ID", "Gene_A", "Gene_B", "Fusion_Pair", "E_Value", "Tier", "Frame", "5_Prime_Gene_Junction", "3_Prime_Gene_Junction", "Number_of_Discordant_Read _Pair", "Number_of_Junction_Spanning_Read", "Number_of_Perfect_Junction_Spanning_Read")
 	f = open(output, 'w')
+	f.write(header[0])
+	for i in header[1:]:
+		f.write('\t%s' % i)
+	f.write('\n')
 	for i in allAnnot:
 		idx = 0
 		for j in i:
