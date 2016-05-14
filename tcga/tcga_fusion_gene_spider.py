@@ -2,7 +2,6 @@
 import spynner
 import urllib2
 from BeautifulSoup import BeautifulSoup
-import datetime
 
 '''
 根据html的信息计算总页数
@@ -45,7 +44,6 @@ def gcta_spider(cancertype, tierclass):
 
 	try:
 		browser.load(url='http://54.84.12.177/PanCanFusV2/Fusions!cancerType')
-		browser.load_jquery(True)
 	except spynner.SpynnerTimeout:
 		print 'Timeout.'
 	else:
@@ -65,26 +63,31 @@ def gcta_spider(cancertype, tierclass):
 		# get total pages
 		pageNum = getNumOfPagesFromHtml(html)
 
+		fusionGenePairs = []
+
 		# first page
-		p = 1
-		fusionGenePairs = extractFusionGenePairsFromHtml(html)
-		print 'processing page %d of %d' % (p, pageNum)
+		if pageNum > 0:
+			p = 1
+			print 'processing page %d of %d' % (p, pageNum)
+			fusionGenePairs = extractFusionGenePairsFromHtml(html)
+		
 
 		# second to last page
-		for i in xrange(1, pageNum):
-			try:
-				browser.wk_click('[id="fusions_next"]')
-				html = browser.html
-				tmp = extractFusionGenePairsFromHtml(html)
-				fusionGenePairs.extend(tmp)
-				tmp = []
-				p = i + 1
-				print 'processing page %d of %d' % (p, pageNum)
-			except:
-				print 'failed to click next page'
-				break
-			else:
-				continue
+		if pageNum > 1:
+			for i in xrange(1, pageNum):
+				try:
+					browser.wk_click('[id="fusions_next"]')
+					html = browser.html
+					tmp = extractFusionGenePairsFromHtml(html)
+					fusionGenePairs.extend(tmp)
+					tmp = []
+					p = i + 1
+					print 'processing page %d of %d' % (p, pageNum)
+				except:
+					print 'failed to click next page'
+					break
+				else:
+					continue
 	browser.close()
 	return fusionGenePairs
 
@@ -124,54 +127,68 @@ def getFusionGenePairAnnot(pUrl):
 				annot.append(tmp)
 	return annot
 
-if __name__ == '__main__':
-	cancertype = ('BLCA', 'BRCA', 'GBM', 'HNSC', 'KIRC', 'LAML', 'LGG', 'LUAD', 'LUSC', 'OV', 'SKCM', 'THCA', 'PRAD', 'ACC', 'UCS', 'CESC', 'ESCA', 'READ', 'UVM','COAD')
-	tierclass = ('tier1', 'tier2', 'tier3', 'tier4')
-	
-	# test
-	# cancertype = ('BRCA',)
-	# tierclass = ('tier4',)
-
-	# get all fusion gene pairs
-	allFusionGenePairs = []
-	for c in cancertype:
-		for t in tierclass:
-			print 'cancer: %s\ttier: %s' % (c, t)
-			fgp = gcta_spider(c, t)
-			allFusionGenePairs.extend(fgp)
-	records = len(allFusionGenePairs)
-	allFusionGenePairs = set(allFusionGenePairs)
-
-	print 'There are total %d cancers in %d different tiers' % (len(cancertype), len(tierclass))
-	print 'There are total %d records' % records
-	print 'There are total %d unique fusion gene pairs' % len(allFusionGenePairs)
-	print '\nDownloading information for each pair of fusion genes\n'
-
-	# get annotation for each fusion gene pair
-	allAnnot = []
-	for fgpURL in allFusionGenePairs:
-		annot = getFusionGenePairAnnot(fgpURL)
-		allAnnot.extend(annot)
-
-	# write results to file
-	## yyyymmdd format
-	d = datetime.datetime.now()
-	stime = str(d.year) + str(d.month) + str(d.day) + str(d.hour) + str(d.minute) + str(d.second)
-	output = "tcga_fusion_genes_annot_%s.txt" % stime
-	print 'write results to %s' % output
+def writeHeader():
+	output = "tcga_fg_annot_header.txt"
+	print '\nwrite header to %s\n' % output
 	header = ("Cancer", "TCGA_Sample_ID", "Gene_A", "Gene_B", "Fusion_Pair", "E_Value", "Tier", "Frame", "5_Prime_Gene_Junction", "3_Prime_Gene_Junction", "Number_of_Discordant_Read _Pair", "Number_of_Junction_Spanning_Read", "Number_of_Perfect_Junction_Spanning_Read")
 	f = open(output, 'w')
 	f.write(header[0])
 	for i in header[1:]:
 		f.write('\t%s' % i)
 	f.write('\n')
-	for i in allAnnot:
-		idx = 0
-		for j in i:
-			if idx == 0:
-				f.write(j)
-			else:
-				f.write('\t%s' % j)
-			idx += 1
+	f.close()
+
+def writeAnnot(output, annot):
+	print 'write results to %s' % output
+	f = open(output, 'w')
+	for i in annot:
+		f.write(i[0])
+		for j in i[1:]:
+			f.write('\t%s' % j)
 		f.write('\n')
 	f.close()
+	return output
+
+
+if __name__ == '__main__':
+	cancertype = ('BLCA', 'BRCA', 'GBM', 'HNSC', 'KIRC', 'LAML', 'LGG', 'LUAD', 'LUSC', 'OV', 'SKCM', 'THCA', 'PRAD', 'ACC', 'UCS', 'CESC', 'ESCA', 'READ', 'UVM','COAD')
+	tierclass = ('tier1', 'tier2', 'tier3', 'tier4')
+	
+	# test
+	# cancertype = ('CESC',)
+	# tierclass = ('tier3','tier4') # tier3 -> 2 record, tier4 -> 0 record
+
+	# bye cancer => by tier
+	allFusionGenePairs = []
+	files = ["tcga_fusion_genes_annot_header.txt"]
+	for c in cancertype:
+		for t in tierclass:
+			print 'cancer: %s\ttier: %s' % (c, t)
+			fgp = gcta_spider(c, t) # fusion gene pair
+			l = len(fgp)
+			print 'There are total %d fusion gene pair' % l
+			if l > 0: # check which pair is already downloaded
+				ufgp = []
+				for i in fgp:
+					if not i in allFusionGenePairs:
+						allFusionGenePairs.append(i)
+						ufgp.append(i)
+				m = len(ufgp)
+				if m > 0: # new pair to download
+					print 'need to download information for %d pair of fusion genes' % m
+					print 'Downloading information for each pair of fusion genes'
+					allAnnot = []
+					for ufgpURL in ufgp:
+						annot = getFusionGenePairAnnot(ufgpURL)
+						allAnnot.extend(annot)
+					output = 'tcga_%s_%s.txt' % (c, t)
+					out = writeAnnot(output, allAnnot)
+					files.append(output)
+	
+	# header File
+	writeHeader()
+
+	# cat files
+	print "\nOn Linux or Mac, run the following command to cat all outputs\n"
+	comm = ' '.join(files)
+	print 'cat ' + comm + ' > tcga_fusionGenes_annot.txt'
