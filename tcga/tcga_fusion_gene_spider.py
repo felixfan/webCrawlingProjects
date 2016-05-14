@@ -125,12 +125,12 @@ def getFusionGenePairAnnot(pUrl):
 	return annot
 
 if __name__ == '__main__':
-	#cancertype = ('BLCA', 'BRCA', 'GBM', 'HNSC', 'KIRC', 'LAML', 'LGG', 'LUAD', 'LUSC', 'OV', 'SKCM', 'THCA', 'PRAD', 'ACC', 'UCS', 'CESC', 'ESCA', 'READ', 'UVM','COAD')
-	#tierclass = ('tier1', 'tier2', 'tier3', 'tier4')
+	cancertype = ('BLCA', 'BRCA', 'GBM', 'HNSC', 'KIRC', 'LAML', 'LGG', 'LUAD', 'LUSC', 'OV', 'SKCM', 'THCA', 'PRAD', 'ACC', 'UCS', 'CESC', 'ESCA', 'READ', 'UVM','COAD')
+	tierclass = ('tier1', 'tier2', 'tier3', 'tier4')
 	
 	# test
-	cancertype = ('BRCA',)
-	tierclass = ('tier4',)
+	# cancertype = ('BRCA',)
+	# tierclass = ('tier4',)
 
 	# get all fusion gene pairs
 	allFusionGenePairs = []
