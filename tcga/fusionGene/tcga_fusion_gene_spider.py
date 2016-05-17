@@ -5,6 +5,13 @@ from BeautifulSoup import BeautifulSoup
 import os
 
 '''
+get all fusion gene information from TCGA
+
+@ Yanhui Fan (felixfanyh@gmail.com)
+last revised on 16 May 2016
+'''
+
+'''
 根据html的信息计算总页数
 '''
 def getNumOfPagesFromHtml(html):
@@ -128,8 +135,7 @@ def getFusionGenePairAnnot(pUrl):
 				annot.append(tmp)
 	return annot
 
-def writeHeader():
-	output = "tcga_fg_annot_header.txt"
+def writeHeader(output):
 	print '\nwrite header to %s\n' % output
 	header = ("Cancer", "TCGA_Sample_ID", "Gene_A", "Gene_B", "Fusion_Pair", "E_Value", "Tier", "Frame", "5_Prime_Gene_Junction", "3_Prime_Gene_Junction", "Number_of_Discordant_Read _Pair", "Number_of_Junction_Spanning_Read", "Number_of_Perfect_Junction_Spanning_Read")
 	f = open(output, 'w')
@@ -151,6 +157,7 @@ def writeAnnot(output, annot):
 
 
 if __name__ == '__main__':
+	# 20 cancers x 4 tiers
 	cancertype = ('BLCA', 'BRCA', 'GBM', 'HNSC', 'KIRC', 'LAML', 'LGG', 'LUAD', 'LUSC', 'OV', 'SKCM', 'THCA', 'PRAD', 'ACC', 'UCS', 'CESC', 'ESCA', 'READ', 'UVM','COAD')
 	tierclass = ('tier1', 'tier2', 'tier3', 'tier4')
 
@@ -210,8 +217,8 @@ if __name__ == '__main__':
 							idx += 1
 							if idx % 100 == 1:
 								print 'Downloading %d of %d ...' % (idx, m)
-						output = 'tcga_%s_%s.txt' % (c, t)
-						out = writeAnnot(output, allAnnot)
+						output = 'tcga_fg_%s_%s.txt' % (c, t)
+						writeAnnot(output, allAnnot)
 						# log
 						fl.write('### %s %s\n' % (c, t))
 						for z in ufgp:
@@ -219,13 +226,14 @@ if __name__ == '__main__':
 	fl.close()
 	
 	# header File
-	writeHeader()
+	output = "tcga_fg_annot_header.txt"
+	writeHeader(output)
 
 	# cat files
-	files = ["tcga_fusion_genes_annot_header.txt"]
+	files = ["tcga_fg_annot_header.txt"]
 	for c in cancertype:
 		for t in tierclass:
-			output = 'tcga_%s_%s.txt' % (c, t)
+			output = 'tcga_fg_%s_%s.txt' % (c, t)
 			files.append(output)
 
 	print "\nOn Linux or Mac, run the following command to cat all outputs\n"
