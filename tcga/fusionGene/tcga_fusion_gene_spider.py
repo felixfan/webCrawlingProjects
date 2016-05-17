@@ -230,12 +230,15 @@ if __name__ == '__main__':
 	writeHeader(output)
 
 	# cat files
+	fl = open(log)
 	files = ["tcga_fg_annot_header.txt"]
-	for c in cancertype:
-		for t in tierclass:
-			output = 'tcga_fg_%s_%s.txt' % (c, t)
+	for r in fl:
+		r = r.strip()
+		if r.startswith('#'):
+			arr = r.split()
+			output = 'tcga_fg_%s_%s.txt' % (arr[1],arr[2])
 			files.append(output)
-
+	fl.close()
 	print "\nOn Linux or Mac, run the following command to cat all outputs\n"
 	comm = ' '.join(files)
 	print 'cat ' + comm + ' > tcga_fusionGenes_annot.txt'
