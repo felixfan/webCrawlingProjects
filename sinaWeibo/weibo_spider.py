@@ -33,6 +33,9 @@ cookie = {"Cookie": "yourCookie"}
 3）运行：
   python weibo_spider.py user_id
   e.g. python weibo_spider.py 1878972254
+
+@ Yanhui Fan (felixfanyh@gmail.com)
+last revised on 22 May 2016
 '''
 
 #### help function
