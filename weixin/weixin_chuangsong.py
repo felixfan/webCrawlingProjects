@@ -3,7 +3,7 @@ import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
  
-import spynner
+from random import choice
 import urllib2
 from BeautifulSoup import BeautifulSoup
 import os
@@ -14,8 +14,11 @@ import os
 def get_pages(gzh_id):
 	pages = [0]
 	gzh_url = "http://chuansong.me/account/" + gzh_id
-	headers = { 'User-Agent' : 'Mozilla/5.0' }
-	request = urllib2.Request(gzh_url, None, headers)
+	headers = [{ 'User-Agent' : 'Mozilla/5.0' }, { 'User-Agent' : 'Mozilla/4.0' }, { 'User-Agent' : 'Mozilla/3.0' },
+						{ 'User-Agent' : 'Chrome/47.0.2526.106' }, { 'User-Agent' : 'Chrome/48.0.2564.116' },
+						{ 'User-Agent' : 'Chrome/50.0.2661.75' },{ 'User-Agent' : 'safari/5.1.10' },{ 'User-Agent' : 'safari/5.1.9' }]
+	header = choice(headers)
+	request = urllib2.Request(gzh_url, None, header)
 	soup = BeautifulSoup(urllib2.urlopen(request).read())
 	for link in soup.findAll("a"):
 		urls = link.get('href')
@@ -41,8 +44,11 @@ def get_articles_url_of_one_page(gzh_id, start):
 
 	base_url = 'http://chuansong.me'
 
-	headers = { 'User-Agent' : 'Mozilla/5.0' }
-	request = urllib2.Request(page_url, None, headers)
+	headers = [{ 'User-Agent' : 'Mozilla/5.0' }, { 'User-Agent' : 'Mozilla/4.0' }, { 'User-Agent' : 'Mozilla/3.0' },
+						{ 'User-Agent' : 'Chrome/47.0.2526.106' }, { 'User-Agent' : 'Chrome/48.0.2564.116' },
+						{ 'User-Agent' : 'Chrome/50.0.2661.75' },{ 'User-Agent' : 'safari/5.1.10' },{ 'User-Agent' : 'safari/5.1.9' }]
+	header = choice(headers)
+	request = urllib2.Request(page_url, None, header)
 	soup = BeautifulSoup(urllib2.urlopen(request).read())
 
 	for link in soup.findAll("h2"):
@@ -71,8 +77,11 @@ def get_articles_url(gzh_id):
 根据每篇文章的网址抓取文章的内容并存放在以文章标题为名字的txt文件里
 '''
 def get_content(a_url):
-	headers = { 'User-Agent' : 'Mozilla/5.0' }
-	request = urllib2.Request(a_url, None, headers)
+	headers = [{ 'User-Agent' : 'Mozilla/5.0' }, { 'User-Agent' : 'Mozilla/4.0' }, { 'User-Agent' : 'Mozilla/3.0' },
+						{ 'User-Agent' : 'Chrome/47.0.2526.106' }, { 'User-Agent' : 'Chrome/48.0.2564.116' },
+						{ 'User-Agent' : 'Chrome/50.0.2661.75' },{ 'User-Agent' : 'safari/5.1.10' },{ 'User-Agent' : 'safari/5.1.9' }]
+	header = choice(headers)
+	request = urllib2.Request(a_url, None, header)
 	soup = BeautifulSoup(urllib2.urlopen(request).read())
 	post_date = soup.find(id='post-date').string  # post_date is a NavigableString. 
 	post_date = str(unicode(post_date))           # You can convert a NavigableString to a Unicode string with unicode()
